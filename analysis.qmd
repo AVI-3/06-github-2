@@ -12,9 +12,9 @@ execute:
 suppressPackageStartupMessages(library(tidyverse))
 ```
 
-## Named Storms Per Year
+## Storms Per Year by Type
 
-This plot shows the total number of unique named storms recorded each year in the NOAA Atlantic hurricane database (`dplyr::storms` dataset).
+This plot shows the annual count of tropical depressions, tropical storms, and hurricanes recorded in the NOAA Atlantic hurricane database (`dplyr::storms` dataset).
 
 ```{r}
 #| label: plot-storms
@@ -23,26 +23,39 @@ This plot shows the total number of unique named storms recorded each year in th
 #| message: false
 #| warning: false
 
-# Calculate the number of distinct named storms per year
+# Calculate the count of each storm type per year
 storms_count <- storms %>%
-  distinct(year, name) %>%
-  count(year, name = "num_storms")
+  filter(status %in% c("tropical depression", "tropical storm", "hurricane")) %>%
+  mutate(status = factor(status, levels = c("tropical depression", "tropical storm", "hurricane"))) %>%
+  distinct(year, name, status) %>%
+  count(year, status, name = "num_storms") %>%
+  complete(year, status, fill = list(num_storms = 0))
 
 # Plot using ggplot2
-ggplot(storms_count, aes(x = year, y = num_storms)) +
-  geom_line(color = "#1f77b4", size = 1.2) +
-  geom_point(color = "#0f3c5e", size = 2.5) +
+ggplot(storms_count, aes(x = year, y = num_storms, fill = status)) +
+  geom_area(position = "stack", alpha = 0.85, color = "white", linewidth = 0.2) +
+  scale_fill_manual(
+    values = c(
+      "tropical depression" = "#9ecae1",  # Light blue
+      "tropical storm"      = "#fdae61",  # Orange
+      "hurricane"           = "#d73027"   # Dark red
+    ),
+    breaks = c("tropical depression", "tropical storm", "hurricane"),
+    labels = c("Tropical Depression", "Tropical Storm", "Hurricane")
+  ) +
   labs(
-    title = "Annual Count of Named Atlantic Storms",
-    subtitle = "Tracking unique storms per year (1975 - present)",
+    title = "Annual Count of Atlantic Storms by Type",
+    subtitle = "Tracking unique storms per year by status (1975 - present)",
     x = "Year",
-    y = "Number of Named Storms"
+    y = "Number of Storms",
+    fill = "Storm Type"
   ) +
   theme_minimal(base_size = 14) +
   theme(
     plot.title = element_text(face = "bold", size = 18, color = "#2c3e50"),
     plot.subtitle = element_text(size = 12, color = "#7f8c8d", margin = margin(b = 15)),
     axis.title = element_text(face = "bold"),
-    panel.grid.minor = element_blank()
+    panel.grid.minor = element_blank(),
+    legend.position = "bottom"
   )
 ```
