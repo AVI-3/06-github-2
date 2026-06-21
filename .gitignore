@@ -1,0 +1,27 @@
+# Quarto cache and build metadata directories
+.quarto/
+_freeze/
+*_cache/
+/cache/
+
+# Quarto output directories (avoiding general HTML exclusion)
+_site/
+_book/
+
+# R and RStudio specific temporary/local files
+.Rproj.user/
+.Rhistory
+.Rdata
+.Ruserdata
+
+# Intermediate knit / rendering markdown documents (excluding final output formats)
+*.knit.md
+*.utf8.md
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Explicitly ensure that HTML output files are NOT ignored
+!*.html
+!**/*.html
